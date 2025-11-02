@@ -339,23 +339,39 @@ const DrawPanel: React.FC = () => {
         setDragOverTarget(null);
     };
 
-    const DraggableParticipant: React.FC<{ participant: Participant, source: DragSource }> = ({ participant, source }) => (
-        <li
-            draggable
-            onDragStart={(e) => handleDragStart(e, participant.id, source)}
-            onDragEnd={() => { setDraggedItemId(null); setDragSource(null); }}
-            className="flex items-center justify-between p-2 my-1 bg-white rounded-md shadow-sm cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md"
-        >
-            <span className="text-sm">{participant.name}</span>
-            <ArrowsUpDownIcon className="w-4 h-4 text-slate-400" />
-        </li>
-    );
+    const DraggableParticipant: React.FC<{ participant: Participant, source: DragSource }> = ({ participant, source }) => {
+        const isDragging = draggedItemId === participant.id;
+        return (
+            <li
+                draggable={true}
+                onDragStart={(e) => handleDragStart(e, participant.id, source)}
+                onDragEnd={() => { setDraggedItemId(null); setDragSource(null); setDragOverTarget(null); }}
+                className={`flex items-center justify-between p-2 my-1 bg-white rounded-md shadow-sm cursor-grab active:cursor-grabbing transition-all hover:shadow-md ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}`}
+                style={{ touchAction: 'none' }}
+            >
+                <span className="text-sm">{participant.name}</span>
+                <ArrowsUpDownIcon className="w-4 h-4 text-slate-400" />
+            </li>
+        );
+    };
 
-    const DropZone: React.FC<{ children: React.ReactNode, onDropHandler: (e: React.DragEvent) => void, onDragOverHandler: (e: React.DragEvent) => void, isOver: boolean, className?: string }> = ({ children, onDropHandler, onDragOverHandler, isOver, className }) => (
-        <div onDrop={onDropHandler} onDragOver={onDragOverHandler} className={`border border-dashed rounded-lg p-4 transition-colors h-full ${isOver ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-slate-50'} ${className}`}>
-            {children}
-        </div>
-    );
+    const DropZone: React.FC<{ children: React.ReactNode, onDropHandler: (e: React.DragEvent) => void, onDragOverHandler: (e: React.DragEvent) => void, isOver: boolean, className?: string }> = ({ children, onDropHandler, onDragOverHandler, isOver, className }) => {
+        const handleDragLeave = (e: React.DragEvent) => {
+            e.preventDefault();
+            setDragOverTarget(null);
+        };
+
+        return (
+            <div
+                onDrop={onDropHandler}
+                onDragOver={onDragOverHandler}
+                onDragLeave={handleDragLeave}
+                className={`border-2 border-dashed rounded-lg p-4 transition-all duration-200 h-full ${isOver ? 'border-blue-500 bg-blue-50 scale-[1.02]' : 'border-slate-300 bg-slate-50'} ${className}`}
+            >
+                {children}
+            </div>
+        );
+    };
     
     return (
         <div className="space-y-6">
